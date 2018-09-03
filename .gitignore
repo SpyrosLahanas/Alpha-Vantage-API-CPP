@@ -1,5 +1,6 @@
 Docs/
 Other/
-bin/
+bin/*.out
+bin/*.o
 tags
 sources/*_test.cpp
