@@ -160,30 +160,32 @@ const char *AVInvalidParameters::what()
     return "Alpha Vantage API Error: Wrong call parameteres";
 }
 
-APIArgument::APIArgument() : urlComponent() {}
+APIArgument::APIArgument() : urlprefix(), optional() {}
 
 APIArgument::APIArgument(APIArgument&& other) :
-    urlComponent(std::move(other.urlComponent))
+    urlprefix(std::move(other.urlprefix)), optional(std::move(other.optional))
 {
     validate = other.validate;
 }
 
-APIArgument::APIArgument(std::string urlComponent,
-        bool (*func_ptr)(std::string& value)) : urlComponent(urlComponent)
+APIArgument::APIArgument(std::string urlprefix,
+        bool (*func_ptr)(std::string& value), bool optional) :
+    urlprefix(urlprefix), optional(optional)
 {
     validate = func_ptr;
 }
 
 APIArgument::APIArgument(const APIArgument& other) :
-    urlComponent(other.urlComponent)
+    urlprefix(other.urlprefix), optional(other.optional)
 {
     validate = other.validate;
 }
 
 APIArgument& APIArgument::operator=(const APIArgument& other)
 {
-    urlComponent = other.urlComponent;
+    urlprefix = other.urlprefix;
     validate = other.validate;
+    optional = other.optional;
     return *this;
 }
 
@@ -191,15 +193,64 @@ std::string APIArgument::get_URLarg(std::string& input)
 {
     if(!validate(input)) throw AVInvalidParameters();
 
-    return urlComponent + input;
+    return urlprefix + input;
 }
 
-APIFunction::APIFunction() : args() {};
+APIFunction::APIFunction() : args(), funcName() {};
 
-APIFunction::APIFunction(const APIFunction& other) : args(other.args) {}
+APIFunction::APIFunction(const APIFunction& other) : args(other.args),
+                                                 funcName(other.funcName) {}
 
 APIFunction& APIFunction::operator=(const APIFunction& other)
 {
     args = other.args;
+    funcName = other.funcName;
     return *this;
+}
+
+bool always_true(std::string& value){return true;}
+
+bool validate_interval(std::string& value)
+{
+    if(value == "1min" || value == "5min" || value == "15min" ||
+            value == "30min" || value == "60min") return true;
+    else return false;
+}
+
+bool validate_outputsize(std::string& value)
+{
+    if (value == "compact" || value == "full") return true;
+    else return false;
+}
+
+bool validate_datatype(std::string& value)
+{
+    if(value == "json" || value == "csv") return true;
+    else return false;
+}
+
+APISpecs::APISpecs() : api_specs()
+{
+    api_specs.reserve(70);
+    //Log the TIME_SERIES_INTRADAY specs
+    //Construct the arguments
+    APIArgument function("function=", &always_true, false);
+    APIArgument symbol("symbol=", &always_true, false);
+    APIArgument interval("interval=", &validate_interval, false);
+    APIArgument output("outputsize=", &validate_outputsize, true);
+    APIArgument datatype("datatype=", &validate_datatype, true);
+    APIArgument apikey("apikey=", &always_true, false);
+
+    //Construct the function
+    APIFunction intraday;
+    intraday.funcName = "TIME_SERIES_INTRADAY";
+    intraday.args.push_back(function);
+    intraday.args.push_back(symbol);
+    intraday.args.push_back(interval);
+    intraday.args.push_back(output);
+    intraday.args.push_back(datatype);
+    intraday.args.push_back(apikey);
+
+    //ADD the function in the specs
+    api_specs[AVFunctions::TIME_SERIES_INTRADAY] = intraday;
 }
