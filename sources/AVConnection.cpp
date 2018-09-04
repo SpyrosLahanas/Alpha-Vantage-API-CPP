@@ -229,6 +229,22 @@ bool validate_datatype(std::string& value)
     else return false;
 }
 
+std::string APISpecs::build_url(AVFunctions func, std::string arg)
+{
+    //Base case for variadic template
+    std::unordered_map<AVFunctions, APIFunction>::iterator iter =
+        api_specs.find(AVFunctions::TIME_SERIES_INTRADAY);
+
+    if(iter == api_specs.end()) return std::string("WrongKey");
+    for (std::vector<APIArgument>::iterator it = iter->second.args.begin();
+            it != iter->second.args.end(); it++)
+    {
+        //TODO: How to figure what APIArgument matches with the provided
+        //argument
+    }
+    return "It is Working";
+}
+
 APISpecs::APISpecs() : api_specs()
 {
     api_specs.reserve(70);

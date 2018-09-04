@@ -124,7 +124,7 @@ struct APIArgument
     bool (*validate)(std::string& value);
     APIArgument();
     APIArgument(APIArgument&& other);
-    APIArgument(std::string usrprefix,
+    APIArgument(std::string urlprefix,
             bool (*func_ptr)(std::string& value), bool optional = true);
     APIArgument(const APIArgument& other);
     APIArgument& operator=(const APIArgument& other);
@@ -146,8 +146,6 @@ struct APISpecs
     APISpecs();
     APISpecs(APISpecs& other) = delete;
     APISpecs& operator=(APISpecs& other) = delete;
-    template<class T, class... Ts> build_url(T function, Args... arg);
+    std::string build_url(AVFunctions func, std::string arg);
 };
-
-
 #endif
