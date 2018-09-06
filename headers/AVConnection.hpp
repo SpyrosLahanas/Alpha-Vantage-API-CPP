@@ -100,23 +100,6 @@ enum struct AVFunctions
     SECTOR
 };
 
-enum struct outputsize{
-    compact,
-    full
-};
-
-class AVConnection
-{
-    std::string AVKey;
-    std::string executeGETRequest(std::string &urlString);
-public:
-	AVConnection() = delete;
-	AVConnection(std::string UserKey);
-    void Print_AVFunctions(AVFunctions series, std::string ticker,
-                          outputsize size);
-    ~AVConnection();
-};
-
 struct APIArgument
 {
     std::string urlprefix;
@@ -143,6 +126,7 @@ struct APIFunction
 struct APISpecs
 {
     std::unordered_map<AVFunctions, APIFunction> api_specs; 
+    std::string urlroot;
     APISpecs();
     APISpecs(APISpecs& other) = delete;
     APISpecs& operator=(APISpecs& other) = delete;
@@ -160,7 +144,8 @@ struct APISpecs
             std::vector<APIArgument>::iterator endit =
                 iter->second.args.end();
 
-            return build_element(beginit, endit, iter->second.funcName, args...);
+            return urlroot +
+                build_element(beginit, endit, iter->second.funcName, args...);
         }
 
     template<class T>
@@ -181,5 +166,30 @@ struct APISpecs
             std::string urlstr1 = build_element(beginit, endit, args...);
             return urlstr + "&" + urlstr1;
         }
+};
+
+class AVConnection
+{
+    std::string AVKey;
+    std::string executeGETRequest(std::string &urlString);
+    APISpecs specs;
+public:
+	AVConnection() = delete;
+	AVConnection(std::string UserKey);
+    template<class ...Ts>
+        void Print_AVFunctions(AVFunctions function, Ts ...args)
+        /*Description: Prints on the terminal the data Alpha Vantage returns
+          for the query parameters provided.*/
+        {
+            //Prepare the URL
+            std::string url = specs.build_url(function, args...);
+            //Execute the request
+            std::string datareturned = executeGETRequest(url);
+
+            //Send data to the console
+            std::unique_ptr<JsonObject> NewJson(read_from_str(datareturned));
+            NewJson->console_print();
+        }
+    ~AVConnection();
 };
 #endif

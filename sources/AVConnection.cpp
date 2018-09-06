@@ -15,7 +15,7 @@ size_t read_return(char *bufptr, size_t size, size_t nitems, void *userp)
     return nitems;
 }
 
-AVConnection::AVConnection(std::string UserKey) : AVKey(UserKey)
+AVConnection::AVConnection(std::string UserKey) : AVKey(UserKey), specs()
 {
     //==============================Description===============================
     /*Class Constructor: Execute a dummy query to test the Alpha Vantage Key
@@ -53,63 +53,6 @@ AVConnection::~AVConnection()
 {
     curl_global_cleanup();
 }
-
-void AVConnection::Print_AVFunctions(AVFunctions series,
-                                         std::string ticker, outputsize size)
-    /*Description: Prints on the terminal the data Alpha Vantage returns for
-    the query parameters provided. These parameters era:
-    AVFunctions series ---> the API function
-    std::string ticker     ---> the global equity identifier
-    outputsize size        ---> either compact or full
-    */
-{
-    //Prepare the function clause of the query
-    std::string function;
-    if(series == AVFunctions::TIME_SERIES_DAILY)
-    {
-       function = "function=TIME_SERIES_DAILY"; 
-    } else if(series ==  AVFunctions::TIME_SERIES_DAILY_ADJUSTED)
-    {
-       function = "function=TIME_SERIES_DAILY_ADJUSTED"; 
-    } else if(series == AVFunctions::TIME_SERIES_WEEKLY)
-    {
-       function = "function=TIME_SERIES_WEEKLY"; 
-    } else if(series == AVFunctions::TIME_SERIES_WEEKLY_ADJUSTED)
-    {
-       function = "function=TIME_SERIES_WEEKLY_ADJUSTED"; 
-    } else if(series == AVFunctions::TIME_SERIES_MONTHLY)
-    {
-       function = "function=TIME_SERIES_MONTHLY"; 
-    } else if(series == AVFunctions::TIME_SERIES_MONTHLY_ADJUSTED)
-    {
-       function = "function=TIME_SERIES_MONTHLY_ADJUSTED"; 
-    } else if(series == AVFunctions::GLOBAL_QUOTE)
-    {
-        function = "function=GLOBAL_QUOTE";    
-    } else {
-        throw AVInvalidParameters();
-    }
-
-    //Prepare the outputsize clause of the query, if relevant
-    std::string outputsize(""); 
-    if(series == AVFunctions::TIME_SERIES_DAILY ||
-                 series == AVFunctions::TIME_SERIES_DAILY_ADJUSTED)
-    {
-        outputsize =+ "&outputsize=" + outputsize
-            += (size == outputsize::compact ? "compact" : "full");
-    }
-    
-    //Prepare the URL
-    std::string url =+ "https://www.alphavantage.co/query?" + function
-    + "&symbol=" + ticker + outputsize + "&apikey=" + AVKey;
-    
-    //Execute the request
-    std::string datareturned = executeGETRequest(url);
-    
-    //Print to the console
-    std::unique_ptr<JsonObject> NewJSON(read_from_str(datareturned));
-    NewJSON->console_print();
-} 
 
 std::string AVConnection::executeGETRequest(std::string &urlString)
 {
@@ -229,7 +172,7 @@ bool validate_datatype(std::string& value)
     else return false;
 }
 
-APISpecs::APISpecs() : api_specs()
+APISpecs::APISpecs() : urlroot("https://www.alphavantage.co/query?")
 {
     api_specs.reserve(70);
     //Log the TIME_SERIES_INTRADAY specs
@@ -251,6 +194,174 @@ APISpecs::APISpecs() : api_specs()
     intraday.args.push_back(datatype);
     intraday.args.push_back(apikey);
 
-    //ADD the function in the specs
+    //ADD the function in specs
     api_specs[AVFunctions::TIME_SERIES_INTRADAY] = intraday;
+
+    //Log the TIME_SERIES_DAILY specs
+    //All arguments already constructed
+    //Construct the function
+    APIFunction daily;
+    daily.funcName = "TIME_SERIES_DAILY";
+    daily.args.push_back(function);
+    daily.args.push_back(symbol);
+    daily.args.push_back(output);
+    daily.args.push_back(datatype);
+    daily.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::TIME_SERIES_DAILY] = daily;
+
+    //Log the TIME_SERIES_DAILY_ADJUSTED specs
+    //All arguments already constructed
+    //Construct the function
+    APIFunction daily_adjusted;
+    daily_adjusted.funcName = "TIME_SERIES_DAILY_ADJUSTED";
+    daily_adjusted.args.push_back(function);
+    daily_adjusted.args.push_back(symbol);
+    daily_adjusted.args.push_back(output);
+    daily_adjusted.args.push_back(datatype);
+    daily_adjusted.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::TIME_SERIES_DAILY_ADJUSTED] = daily_adjusted;
+
+    //Log the TIME_SERIES_WEEKLY specs
+    //All arguments already constructed
+    //Construct the function
+    APIFunction weekly;
+    weekly.funcName = "TIME_SERIES_WEEKLY";
+    weekly.args.push_back(function);
+    weekly.args.push_back(symbol);
+    weekly.args.push_back(datatype);
+    weekly.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::TIME_SERIES_WEEKLY] = weekly;
+
+    //Log the TIME_SERIES_WEEKLY_ADJUSTED specs
+    //All arguments already constructed
+    //Construct the function
+    APIFunction weekly_adjusted;
+    weekly_adjusted.funcName = "TIME_SERIES_WEEKLY_ADJUSTED";
+    weekly_adjusted.args.push_back(function);
+    weekly_adjusted.args.push_back(symbol);
+    weekly_adjusted.args.push_back(datatype);
+    weekly_adjusted.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::TIME_SERIES_WEEKLY_ADJUSTED] = weekly_adjusted;
+
+    //Log the TIME_SERIES_MONTHLY specs
+    //All arguments already constructed
+    //Construct the function
+    APIFunction monhtly;
+    monhtly.funcName = "TIME_SERIES_MONTHLY";
+    monhtly.args.push_back(function);
+    monhtly.args.push_back(symbol);
+    monhtly.args.push_back(datatype);
+    monhtly.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::TIME_SERIES_MONTHLY] = monhtly;
+
+    //Log the TIME_SERIES_MONTHLY_ADJUSTED specs
+    //All arguments already constructed
+    //Construct the function
+    APIFunction monthly_adjusted;
+    monthly_adjusted.funcName = "TIME_SERIES_MONTHLY_ADJUSTED";
+    monthly_adjusted.args.push_back(function);
+    monthly_adjusted.args.push_back(symbol);
+    monthly_adjusted.args.push_back(datatype);
+    monthly_adjusted.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::TIME_SERIES_MONTHLY_ADJUSTED] = monthly_adjusted;
+
+    //Log the GLOBAL_QUOTE specs
+    //All arguments already constructed
+    //Construct the function
+    APIFunction global_quote;
+    global_quote.funcName = "GLOBAL_QUOTE";
+    global_quote.args.push_back(function);
+    global_quote.args.push_back(symbol);
+    global_quote.args.push_back(datatype);
+    global_quote.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::GLOBAL_QUOTE] = global_quote;
+
+    //Log the CURRENCY_EXCHANGE_RATE specs
+    //Construct the arguments from_currency and to_currency
+    APIArgument from_FX("from_currency=", &always_true, false);
+    APIArgument to_FX("to_currency=", &always_true, false);
+
+    //Construct the function
+    APIFunction fx_rate;
+    fx_rate.funcName = "CURRENCY_EXCHANGE_RATE";
+    fx_rate.args.push_back(function);
+    fx_rate.args.push_back(from_FX);
+    fx_rate.args.push_back(to_FX);
+    fx_rate.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::CURRENCY_EXCHANGE_RATE] = fx_rate;
+
+    //Log the FX_INTRADAY specs
+    //All argument already constructed
+    //Construct the function
+    APIFunction fx_intraday;
+    fx_intraday.funcName = "FX_INTRADAY";
+    fx_intraday.args.push_back(function);
+    fx_intraday.args.push_back(from_FX);
+    fx_intraday.args.push_back(to_FX);
+    fx_intraday.args.push_back(interval);
+    fx_intraday.args.push_back(output);
+    fx_intraday.args.push_back(datatype);
+    fx_intraday.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::FX_INTRADAY] = fx_intraday;
+
+    //Log the FX_DAILY specs
+    //All argument already constructed
+    //Construct the function
+    APIFunction fx_daily;
+    fx_daily.funcName = "FX_DAILY";
+    fx_daily.args.push_back(function);
+    fx_daily.args.push_back(from_FX);
+    fx_daily.args.push_back(to_FX);
+    fx_daily.args.push_back(output);
+    fx_daily.args.push_back(datatype);
+    fx_daily.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::FX_DAILY] = fx_daily;
+
+    //Log the FX_WEEKLY specs
+    //All argument already constructed
+    //Construct the function
+    APIFunction fx_weekly;
+    fx_weekly.funcName = "FX_WEEKLY";
+    fx_weekly.args.push_back(function);
+    fx_weekly.args.push_back(from_FX);
+    fx_weekly.args.push_back(to_FX);
+    fx_weekly.args.push_back(datatype);
+    fx_weekly.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::FX_WEEKLY] = fx_weekly;
+
+    //Log the FX_MONTHLY specs
+    //All argument already constructed
+    //Construct the function
+    APIFunction fx_monthly;
+    fx_monthly.funcName = "FX_MONTHLY";
+    fx_monthly.args.push_back(function);
+    fx_monthly.args.push_back(from_FX);
+    fx_monthly.args.push_back(to_FX);
+    fx_monthly.args.push_back(datatype);
+    fx_monthly.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::FX_MONTHLY] = fx_monthly;
 }
