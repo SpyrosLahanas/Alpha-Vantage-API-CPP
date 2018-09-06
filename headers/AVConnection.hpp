@@ -128,7 +128,7 @@ struct APIArgument
             bool (*func_ptr)(std::string& value), bool optional = true);
     APIArgument(const APIArgument& other);
     APIArgument& operator=(const APIArgument& other);
-    std::string get_URLarg(std::string& input);
+    std::string get_URLarg(std::string input);
 };
 
 struct APIFunction
@@ -146,6 +146,40 @@ struct APISpecs
     APISpecs();
     APISpecs(APISpecs& other) = delete;
     APISpecs& operator=(APISpecs& other) = delete;
-    std::string build_url(AVFunctions func, std::string arg);
+    template<class ...Ts>
+        std::string build_url(AVFunctions func, Ts ...args)
+        {
+            //FETCH from the function specs
+            std::unordered_map<AVFunctions, APIFunction>::iterator iter =
+                api_specs.find(func);
+            if(iter == api_specs.end()) throw AVInvalidParameters();
+
+            //GET iterators for function arguments
+            std::vector<APIArgument>::iterator beginit =
+                iter->second.args.begin();
+            std::vector<APIArgument>::iterator endit =
+                iter->second.args.end();
+
+            return build_element(beginit, endit, iter->second.funcName, args...);
+        }
+
+    template<class T>
+        std::string build_element(std::vector<APIArgument>::iterator beginit,
+            std::vector<APIArgument>::iterator endit, T arg)
+        {
+            if(beginit == endit) throw AVInvalidParameters();
+            return beginit->get_URLarg(arg);
+        }
+
+    template<class T, class ...Ts>
+        std::string build_element(std::vector<APIArgument>::iterator beginit,
+                std::vector<APIArgument>::iterator endit, T arg, Ts ...args)
+        {
+            if(beginit == endit) throw AVInvalidParameters();
+            std::string urlstr(beginit->get_URLarg(arg));
+            beginit++;
+            std::string urlstr1 = build_element(beginit, endit, args...);
+            return urlstr + "&" + urlstr1;
+        }
 };
 #endif
