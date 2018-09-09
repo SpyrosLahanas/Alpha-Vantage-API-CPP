@@ -168,7 +168,7 @@ bool validate_tech_interval(std::string& value)
     else return false;
 }
 
-bool validate_time_period(std::string& value)
+bool validate_posi_int(std::string& value)
 {
     try
     {
@@ -180,8 +180,20 @@ bool validate_time_period(std::string& value)
         return false;
     }
 }
+bool validate_ma_type(std::string& value)
+{
+    try
+    {
+        int arg = std::stoi(value);
+        return (arg >= 0 || arg <= 8);
+    }
+    catch(...)
+    {
+        return false;
+    }
+}
 
-bool validate_limit(std::string& value)
+bool validate_dbl(std::string& value)
 {
     try
     {
@@ -449,7 +461,7 @@ APISpecs::APISpecs() : urlroot("https://www.alphavantage.co/query?")
     //Construct the missing argument (i.e., interval, time_period and
     //series_type).
     APIArgument interval_tech("interval=", &validate_tech_interval, false);
-    APIArgument time_period("time_period=", &validate_time_period, false);
+    APIArgument time_period("time_period=", &validate_posi_int, false);
     APIArgument series_type("series_type=", &validate_series_type, false);
 
     //Construct the function
@@ -563,9 +575,9 @@ APISpecs::APISpecs() : urlroot("https://www.alphavantage.co/query?")
     api_specs[AVFunctions::KAMA] = kama;
 
     //Log the MAMA specs
-    //Construct missing arguments (i.e., fastlimi and slowlimit).
-    APIArgument fastlimit("fastlimit=", &validate_limit, true);
-    APIArgument slowlimit("slowlimit=", &validate_limit, true);
+    //Construct missing arguments (i.e., fastlimit and slowlimit).
+    APIArgument fastlimit("fastlimit=", &validate_dbl, true);
+    APIArgument slowlimit("slowlimit=", &validate_dbl, true);
 
     //Costruct the function
     APIFunction mama;
@@ -597,4 +609,733 @@ APISpecs::APISpecs() : urlroot("https://www.alphavantage.co/query?")
 
     //ADD the function in specs
     api_specs[AVFunctions::T3] = t3;
+
+    //Log the MACD specs
+    //Construct missing arguments(i.e. fastperiod, slowperiod and signal
+    //period).
+    APIArgument fastperiod("fastperiod=", &validate_posi_int, true);
+    APIArgument slowperiod("slowperiod=", &validate_posi_int, true);
+    APIArgument signalperiod("signalperiod=", &validate_posi_int, true);
+
+    //Constructthe function
+    APIFunction macd;
+    macd.funcName = "MACD";
+    macd.args.push_back(function);
+    macd.args.push_back(symbol);
+    macd.args.push_back(interval_tech);
+    macd.args.push_back(series_type);
+    macd.args.push_back(fastperiod);
+    macd.args.push_back(slowperiod);
+    macd.args.push_back(signalperiod);
+    macd.args.push_back(datatype);
+    macd.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::MACD] = macd;
+
+    //Log the MACDEXT specs
+    //Construct missing arguments(i.e.fastmatype, slowmatype, signalmatype).
+    APIArgument fastmatype("fastmatype=", &validate_ma_type, true);
+    APIArgument slowmatype("slowmatype=", &validate_ma_type, true);
+    APIArgument signalmatype("signalmatype=", &validate_ma_type, true);
+
+    //Constructthe function
+    APIFunction macdext;
+    macdext.funcName = "MACDEXT";
+    macdext.args.push_back(function);
+    macdext.args.push_back(symbol);
+    macdext.args.push_back(interval_tech);
+    macdext.args.push_back(series_type);
+    macdext.args.push_back(fastperiod);
+    macdext.args.push_back(slowperiod);
+    macdext.args.push_back(signalperiod);
+    macdext.args.push_back(fastmatype);
+    macdext.args.push_back(slowmatype);
+    macdext.args.push_back(signalmatype);
+    macdext.args.push_back(datatype);
+    macdext.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::MACDEXT] = macdext;
+
+    //Log specs for STOCH
+    //Construct missing arguments (i.e. fastkperiod, slowkperiod, slowdperiod,
+    //slowkmatype, slowdmatype)
+    APIArgument fastkperiod("fastkperiod=", &validate_posi_int, true);
+    APIArgument slowkperiod("slowkperiod=", &validate_posi_int, true);
+    APIArgument slowdperiod("slowdperiod=", &validate_posi_int, true);
+    APIArgument slowkmatype("slowkmatype=", &validate_ma_type, true);
+    APIArgument slowdmatype("slowdmatype=", &validate_ma_type, true);
+
+    //Construct the function
+    APIFunction stoch;
+    stoch.funcName = "STOCH";
+    stoch.args.push_back(function);
+    stoch.args.push_back(symbol);
+    stoch.args.push_back(interval_tech);
+    stoch.args.push_back(fastkperiod);
+    stoch.args.push_back(slowkperiod);
+    stoch.args.push_back(slowdperiod);
+    stoch.args.push_back(slowkmatype);
+    stoch.args.push_back(slowdmatype);
+    stoch.args.push_back(datatype);
+    stoch.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::STOCH] = stoch;
+
+    //Log specs for STOCHF
+    //Construct missing arguments (i.e. fastdperiod, fastdmatype).
+    APIArgument fastdperiod("fastdperiod=", &validate_posi_int, true);
+    APIArgument fastdmatype("fastdmatype=", &validate_ma_type, true);
+
+    //Construct the function
+    APIFunction stochf;
+    stochf.funcName = "STOCHF";
+    stochf.args.push_back(function);
+    stochf.args.push_back(symbol);
+    stochf.args.push_back(interval_tech);
+    stochf.args.push_back(fastkperiod);
+    stochf.args.push_back(fastdperiod);
+    stochf.args.push_back(fastdmatype);
+    stochf.args.push_back(datatype);
+    stochf.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::STOCHF] = stochf;
+
+    //Log specs for RSI
+    //All arguments already constructed.
+
+    //Construct the function
+    APIFunction rsi;
+    rsi.funcName = "RSI";
+    rsi.args.push_back(function);
+    rsi.args.push_back(symbol);
+    rsi.args.push_back(interval_tech);
+    rsi.args.push_back(time_period);
+    rsi.args.push_back(series_type);
+    rsi.args.push_back(datatype);
+    rsi.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::RSI] = rsi;
+
+    //Log specs for STOCHRSI
+    //All arguments already constructed.
+
+    //Construct the function
+    APIFunction stochrsi;
+    stochrsi.funcName = "STOCHRSI";
+    stochrsi.args.push_back(function);
+    stochrsi.args.push_back(symbol);
+    stochrsi.args.push_back(interval_tech);
+    stochrsi.args.push_back(time_period);
+    stochrsi.args.push_back(series_type);
+    stochrsi.args.push_back(fastkperiod);
+    stochrsi.args.push_back(fastdperiod);
+    stochrsi.args.push_back(fastdmatype);
+    stochrsi.args.push_back(datatype);
+    stochrsi.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::STOCHRSI] = stochrsi;
+
+    //Log specs for WILLR
+    //All arguments already constructed.
+
+    //Construct the function
+    APIFunction willr;
+    willr.funcName = "WILLR";
+    willr.args.push_back(function);
+    willr.args.push_back(symbol);
+    willr.args.push_back(interval_tech);
+    willr.args.push_back(time_period);
+    willr.args.push_back(datatype);
+    willr.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::WILLR] = willr;
+
+    //Log specs for ADX
+    //All arguments already constructed.
+
+    //Construct the function
+    APIFunction adx;
+    adx.funcName = "ADX";
+    adx.args.push_back(function);
+    adx.args.push_back(symbol);
+    adx.args.push_back(interval_tech);
+    adx.args.push_back(time_period);
+    adx.args.push_back(datatype);
+    adx.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::ADX] = adx;
+
+    //Log specs for ADXR
+    //All arguments already constructed.
+
+    //Construct the function
+    APIFunction adxr;
+    adxr.funcName = "ADXR";
+    adxr.args.push_back(function);
+    adxr.args.push_back(symbol);
+    adxr.args.push_back(interval_tech);
+    adxr.args.push_back(time_period);
+    adxr.args.push_back(datatype);
+    adxr.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::ADXR] = adxr;
+
+    //Log specs for APO
+    //Construct missing argument (i.e., matype).
+    APIArgument matype("matype=", &validate_ma_type, true);
+
+    //Construct the function
+    APIFunction apo;
+    apo.funcName = "APO";
+    apo.args.push_back(function);
+    apo.args.push_back(symbol);
+    apo.args.push_back(interval_tech);
+    apo.args.push_back(series_type);
+    apo.args.push_back(fastperiod);
+    apo.args.push_back(slowperiod);
+    apo.args.push_back(matype);
+    apo.args.push_back(datatype);
+    apo.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::APO] = apo;
+
+    //Log specs for PPO
+    //All arguments already constructed.
+    //Construct the function
+    APIFunction ppo;
+    ppo.funcName = "PPO";
+    ppo.args.push_back(function);
+    ppo.args.push_back(symbol);
+    ppo.args.push_back(interval_tech);
+    ppo.args.push_back(series_type);
+    ppo.args.push_back(fastperiod);
+    ppo.args.push_back(slowperiod);
+    ppo.args.push_back(matype);
+    ppo.args.push_back(datatype);
+    ppo.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::PPO] = ppo;
+
+    //Log specs for MOM
+    //All arguments already constructed.
+    //Construct the function
+    APIFunction mom;
+    mom.funcName = "MOM";
+    mom.args.push_back(function);
+    mom.args.push_back(symbol);
+    mom.args.push_back(interval_tech);
+    mom.args.push_back(time_period);
+    mom.args.push_back(series_type);
+    mom.args.push_back(datatype);
+    mom.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::MOM] = mom;
+
+    //Log specs for BOP
+    //All arguments already constructed.
+    //Construct the function
+    APIFunction bop;
+    bop.funcName = "BOP";
+    bop.args.push_back(function);
+    bop.args.push_back(symbol);
+    bop.args.push_back(interval_tech);
+    bop.args.push_back(datatype);
+    bop.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::BOP] = bop;
+
+    //Log specs for CCI
+    //All arguments already constructed.
+    //Construct the function
+    APIFunction cci;
+    cci.funcName = "CCI";
+    cci.args.push_back(function);
+    cci.args.push_back(symbol);
+    cci.args.push_back(interval_tech);
+    cci.args.push_back(time_period);
+    cci.args.push_back(datatype);
+    cci.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::CCI] = cci;
+
+    //Log specs for CMO
+    //All arguments already constructed.
+    //Construct the function
+    APIFunction cmo;
+    cmo.funcName = "CMO";
+    cmo.args.push_back(function);
+    cmo.args.push_back(symbol);
+    cmo.args.push_back(interval_tech);
+    cmo.args.push_back(time_period);
+    cmo.args.push_back(series_type);
+    cmo.args.push_back(datatype);
+    cmo.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::CMO] = cmo;
+
+    //Log specs for ROC
+    //All arguments already constructed.
+    //Construct the function
+    APIFunction roc;
+    roc.funcName = "ROC";
+    roc.args.push_back(function);
+    roc.args.push_back(symbol);
+    roc.args.push_back(interval_tech);
+    roc.args.push_back(time_period);
+    roc.args.push_back(series_type);
+    roc.args.push_back(datatype);
+    roc.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::ROC] = roc;
+
+    //Log specs for ROCR
+    //All arguments already constructed.
+    //Construct the function
+    APIFunction rocr;
+    rocr.funcName = "ROCR";
+    rocr.args.push_back(function);
+    rocr.args.push_back(symbol);
+    rocr.args.push_back(interval_tech);
+    rocr.args.push_back(time_period);
+    rocr.args.push_back(series_type);
+    rocr.args.push_back(datatype);
+    rocr.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::ROCR] = rocr;
+
+    //Log specs for AROON
+    //All arguments already constructed.
+    //Construct the function
+    APIFunction aroon;
+    aroon.funcName = "AROON";
+    aroon.args.push_back(function);
+    aroon.args.push_back(symbol);
+    aroon.args.push_back(interval_tech);
+    aroon.args.push_back(time_period);
+    aroon.args.push_back(datatype);
+    aroon.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::AROON] = aroon;
+
+    //Log specs for AROONOSC
+    //All arguments already constructed.
+    //Construct the function
+    APIFunction aroonosc;
+    aroonosc.funcName = "AROONOSC";
+    aroonosc.args.push_back(function);
+    aroonosc.args.push_back(symbol);
+    aroonosc.args.push_back(interval_tech);
+    aroonosc.args.push_back(time_period);
+    aroonosc.args.push_back(datatype);
+    aroonosc.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::AROONOSC] = aroonosc;
+
+    //Log specs for MFI
+    //All arguments already constructed.
+    //Construct the function
+    APIFunction mfi;
+    mfi.funcName = "MFI";
+    mfi.args.push_back(function);
+    mfi.args.push_back(symbol);
+    mfi.args.push_back(interval_tech);
+    mfi.args.push_back(time_period);
+    mfi.args.push_back(datatype);
+    mfi.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::MFI] = mfi;
+
+    //Log specs for TRIX
+    //All arguments already constructed.
+    //Construct the function
+    APIFunction trix;
+    trix.funcName = "TRIX";
+    trix.args.push_back(function);
+    trix.args.push_back(symbol);
+    trix.args.push_back(interval_tech);
+    trix.args.push_back(time_period);
+    trix.args.push_back(series_type);
+    trix.args.push_back(datatype);
+    trix.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::TRIX] = trix;
+
+    //Log specs for ULTOSC
+    //Construct missing argument (i.e. timeperiod1, timeperiod2 and
+    //timeperiod3).
+    APIArgument timeperiod1("timeperiod1=", &validate_posi_int, true);
+    APIArgument timeperiod2("timeperiod2=", &validate_posi_int, true);
+    APIArgument timeperiod3("timeperiod3=", &validate_posi_int, true);
+
+    //Construct the function
+    APIFunction ultosc;
+    ultosc.funcName = "ULTOSC";
+    ultosc.args.push_back(function);
+    ultosc.args.push_back(symbol);
+    ultosc.args.push_back(interval_tech);
+    ultosc.args.push_back(timeperiod1);
+    ultosc.args.push_back(timeperiod2);
+    ultosc.args.push_back(timeperiod3);
+    ultosc.args.push_back(datatype);
+    ultosc.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::ULTOSC] = ultosc;
+
+    //Log specs for DX
+    //All arguments already constructed.
+    //Construct the function
+    APIFunction dx;
+    dx.funcName = "DX";
+    dx.args.push_back(function);
+    dx.args.push_back(symbol);
+    dx.args.push_back(interval_tech);
+    dx.args.push_back(time_period);
+    dx.args.push_back(datatype);
+    dx.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::DX] = dx;
+
+    //Log specs for MINUS_DI
+    //All arguments already constructed.
+    //Construct the function
+    APIFunction minus_di;
+    minus_di.funcName = "MINUS_DI";
+    minus_di.args.push_back(function);
+    minus_di.args.push_back(symbol);
+    minus_di.args.push_back(interval_tech);
+    minus_di.args.push_back(time_period);
+    minus_di.args.push_back(datatype);
+    minus_di.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::MINUS_DI] = minus_di;
+
+    //Log specs for PLUS_DI
+    //All arguments already constructed.
+    //Construct the function
+    APIFunction plus_di;
+    plus_di.funcName = "PLUS_DI";
+    plus_di.args.push_back(function);
+    plus_di.args.push_back(symbol);
+    plus_di.args.push_back(interval_tech);
+    plus_di.args.push_back(time_period);
+    plus_di.args.push_back(datatype);
+    plus_di.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::PLUS_DI] = plus_di;
+
+    //Log specs for MINUS_DM
+    //All arguments already constructed.
+    //Construct the function
+    APIFunction minus_dm;
+    minus_dm.funcName = "MINUS_DM";
+    minus_dm.args.push_back(function);
+    minus_dm.args.push_back(symbol);
+    minus_dm.args.push_back(interval_tech);
+    minus_dm.args.push_back(time_period);
+    minus_dm.args.push_back(datatype);
+    minus_dm.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::MINUS_DM] = minus_dm;
+
+    //Log specs for PLUS_DM
+    //All arguments already constructed.
+    //Construct the function
+    APIFunction plus_dm;
+    plus_dm.funcName = "PLUS_DM";
+    plus_dm.args.push_back(function);
+    plus_dm.args.push_back(symbol);
+    plus_dm.args.push_back(interval_tech);
+    plus_dm.args.push_back(time_period);
+    plus_dm.args.push_back(datatype);
+    plus_dm.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::PLUS_DM] = plus_dm;
+
+    //Log specs for BBANDS
+    //Construct missing arguments (i.e., nbdevup, nbdevdn).
+    APIArgument nbdevup("nbdevup=", &validate_posi_int, true);
+    APIArgument nbdevdn("nbdevdn=", &validate_posi_int, true);
+
+    //Construct the function
+    APIFunction bbands;
+    bbands.funcName = "BBANDS";
+    bbands.args.push_back(function);
+    bbands.args.push_back(symbol);
+    bbands.args.push_back(interval_tech);
+    bbands.args.push_back(time_period);
+    bbands.args.push_back(series_type);
+    bbands.args.push_back(nbdevup);
+    bbands.args.push_back(nbdevdn);
+    bbands.args.push_back(matype);
+    bbands.args.push_back(datatype);
+    bbands.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::BBANDS] = bbands;
+
+    //Log specs for MIDPOINT
+    //All arguments already constructed
+    //Construct the function
+    APIFunction midpoint;
+    midpoint.funcName = "MIDPOINT";
+    midpoint.args.push_back(function);
+    midpoint.args.push_back(symbol);
+    midpoint.args.push_back(interval_tech);
+    midpoint.args.push_back(time_period);
+    midpoint.args.push_back(series_type);
+    midpoint.args.push_back(datatype);
+    midpoint.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::MIDPOINT] = midpoint;
+
+    //Log specs for MIDPRICE
+    //All arguments already constructed
+    //Construct the function
+    APIFunction midprice;
+    midprice.funcName = "MIDPRICE";
+    midprice.args.push_back(function);
+    midprice.args.push_back(symbol);
+    midprice.args.push_back(interval_tech);
+    midprice.args.push_back(time_period);
+    midprice.args.push_back(datatype);
+    midprice.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::MIDPRICE] = midprice;
+
+    //Log specs for SAR
+    //Construct missing arguments (i.e, acceleration and maximum).
+    APIArgument acceleration("acceleration=", &validate_dbl, true);
+    APIArgument maximum("maximum=", &validate_dbl, true);
+
+    //Construct the function
+    APIFunction sar;
+    sar.funcName = "SAR";
+    sar.args.push_back(function);
+    sar.args.push_back(symbol);
+    sar.args.push_back(interval_tech);
+    sar.args.push_back(acceleration);
+    sar.args.push_back(maximum);
+    sar.args.push_back(datatype);
+    sar.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::SAR] = sar;
+
+    //Log specs for TRANGE
+    //All arguments already constructed
+    //Construct the function
+    APIFunction trange;
+    trange.funcName = "TRANGE";
+    trange.args.push_back(function);
+    trange.args.push_back(symbol);
+    trange.args.push_back(interval_tech);
+    trange.args.push_back(datatype);
+    trange.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::TRANGE] = trange;
+
+    //Log specs for ATR
+    //All arguments already constructed
+    //Construct the function
+    APIFunction atr;
+    atr.funcName = "ATR";
+    atr.args.push_back(function);
+    atr.args.push_back(symbol);
+    atr.args.push_back(interval_tech);
+    atr.args.push_back(time_period);
+    atr.args.push_back(datatype);
+    atr.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::ATR] = atr;
+
+    //Log specs for NATR
+    //All arguments already constructed
+    //Construct the function
+    APIFunction natr;
+    natr.funcName = "NATR";
+    natr.args.push_back(function);
+    natr.args.push_back(symbol);
+    natr.args.push_back(interval_tech);
+    natr.args.push_back(time_period);
+    natr.args.push_back(datatype);
+    natr.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::NATR] = natr;
+
+    //Log specs for AD
+    //All arguments already constructed
+    //Construct the function
+    APIFunction ad;
+    ad.funcName = "AD";
+    ad.args.push_back(function);
+    ad.args.push_back(symbol);
+    ad.args.push_back(interval_tech);
+    ad.args.push_back(datatype);
+    ad.args.push_back(apikey);
+
+    //ADD the function in specs
+    api_specs[AVFunctions::AD] = ad;
+
+    //Log specs for ADOSC
+    //All arguments alreadoscy constructed
+    //Construct the function
+    APIFunction adosc;
+    adosc.funcName = "ADOSC";
+    adosc.args.push_back(function);
+    adosc.args.push_back(symbol);
+    adosc.args.push_back(interval_tech);
+    adosc.args.push_back(fastperiod);
+    adosc.args.push_back(slowperiod);
+    adosc.args.push_back(datatype);
+    adosc.args.push_back(apikey);
+
+    //ADOSCD the function in specs
+    api_specs[AVFunctions::ADOSC] = adosc;
+
+    //Log specs for OBV
+    //All arguments alreobvy constructed
+    //Construct the function
+    APIFunction obv;
+    obv.funcName = "OBV";
+    obv.args.push_back(function);
+    obv.args.push_back(symbol);
+    obv.args.push_back(interval_tech);
+    obv.args.push_back(datatype);
+    obv.args.push_back(apikey);
+
+    //OBVD the function in specs
+    api_specs[AVFunctions::OBV] = obv;
+
+    //Log specs for HT_TRENDLINE
+    //All arguments alreht_trendliney constructed
+    //Construct the function
+    APIFunction ht_trendline;
+    ht_trendline.funcName = "HT_TRENDLINE";
+    ht_trendline.args.push_back(function);
+    ht_trendline.args.push_back(symbol);
+    ht_trendline.args.push_back(interval_tech);
+    ht_trendline.args.push_back(series_type);
+    ht_trendline.args.push_back(datatype);
+    ht_trendline.args.push_back(apikey);
+
+    //HT_TRENDLINED the function in specs
+    api_specs[AVFunctions::HT_TRENDLINE] = ht_trendline;
+
+    //Log specs for HT_SINE
+    //All arguments alreht_siney constructed
+    //Construct the function
+    APIFunction ht_sine;
+    ht_sine.funcName = "HT_SINE";
+    ht_sine.args.push_back(function);
+    ht_sine.args.push_back(symbol);
+    ht_sine.args.push_back(interval_tech);
+    ht_sine.args.push_back(series_type);
+    ht_sine.args.push_back(datatype);
+    ht_sine.args.push_back(apikey);
+
+    //HT_SINED the function in specs
+    api_specs[AVFunctions::HT_SINE] = ht_sine;
+
+    //Log specs for HT_TRENDMODE
+    //All arguments alreht_trendmodey constructed
+    //Construct the function
+    APIFunction ht_trendmode;
+    ht_trendmode.funcName = "HT_TRENDMODE";
+    ht_trendmode.args.push_back(function);
+    ht_trendmode.args.push_back(symbol);
+    ht_trendmode.args.push_back(interval_tech);
+    ht_trendmode.args.push_back(series_type);
+    ht_trendmode.args.push_back(datatype);
+    ht_trendmode.args.push_back(apikey);
+
+    //HT_TRENDMODED the function in specs
+    api_specs[AVFunctions::HT_TRENDMODE] = ht_trendmode;
+
+    //Log specs for HT_DCPERIOD
+    //All arguments alreht_dcperiody constructed
+    //Construct the function
+    APIFunction ht_dcperiod;
+    ht_dcperiod.funcName = "HT_DCPERIOD";
+    ht_dcperiod.args.push_back(function);
+    ht_dcperiod.args.push_back(symbol);
+    ht_dcperiod.args.push_back(interval_tech);
+    ht_dcperiod.args.push_back(series_type);
+    ht_dcperiod.args.push_back(datatype);
+    ht_dcperiod.args.push_back(apikey);
+
+    //HT_DCPERIODD the function in specs
+    api_specs[AVFunctions::HT_DCPERIOD] = ht_dcperiod;
+
+    //Log specs for HT_DCPHASE
+    //All arguments alreht_dcphasey constructed
+    //Construct the function
+    APIFunction ht_dcphase;
+    ht_dcphase.funcName = "HT_DCPHASE";
+    ht_dcphase.args.push_back(function);
+    ht_dcphase.args.push_back(symbol);
+    ht_dcphase.args.push_back(interval_tech);
+    ht_dcphase.args.push_back(series_type);
+    ht_dcphase.args.push_back(datatype);
+    ht_dcphase.args.push_back(apikey);
+
+    //HT_DCPHASED the function in specs
+    api_specs[AVFunctions::HT_DCPHASE] = ht_dcphase;
+
+    //Log specs for HT_PHASOR
+    //All arguments alreht_phasory constructed
+    //Construct the function
+    APIFunction ht_phasor;
+    ht_phasor.funcName = "HT_PHASOR";
+    ht_phasor.args.push_back(function);
+    ht_phasor.args.push_back(symbol);
+    ht_phasor.args.push_back(interval_tech);
+    ht_phasor.args.push_back(series_type);
+    ht_phasor.args.push_back(datatype);
+    ht_phasor.args.push_back(apikey);
+
+    //HT_PHASORD the function in specs
+    api_specs[AVFunctions::HT_PHASOR] = ht_phasor;
+
+    //Log specs for SECTOR
+    //All arguments alreht_phasory constructed
+    //Construct the function
+    APIFunction sector;
+    sector.funcName = "SECTOR";
+    sector.args.push_back(function);
+    sector.args.push_back(apikey);
+
+    //ADD the function is specs
+    api_specs[AVFunctions::SECTOR] = sector;
 }

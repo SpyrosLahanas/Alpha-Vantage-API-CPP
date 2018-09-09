@@ -78,7 +78,7 @@ enum struct AVFunctions
     ULTOSC,
     DX,
     MINUS_DI,
-    PULS_DI,
+    PLUS_DI,
     MINUS_DM,
     PLUS_DM,
     BBANDS,
