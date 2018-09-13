@@ -23,6 +23,7 @@ public:
 
 class AVInvalidParameters: public std::exception
 {
+public:
     virtual const char *what();
 };
 
@@ -97,7 +98,8 @@ enum struct AVFunctions
     HT_DCPERIOD,
     HT_DCPHASE,
     HT_PHASOR,
-    SECTOR
+    SECTOR,
+    NONE
 };
 
 struct APIArgument
@@ -130,7 +132,8 @@ struct APISpecs
     APISpecs();
     APISpecs(APISpecs& other) = delete;
     APISpecs& operator=(APISpecs& other) = delete;
-    bool is_function(std::string funcName);
+    bool is_function(const std::string& funcName);
+    AVFunctions lookup_function(const std::string& funcName);
     std::string build_url(AVFunctions func, std::vector<std::string>& args);
     template<class ...Ts>
         std::string build_url(AVFunctions func, Ts ...args)
@@ -178,6 +181,8 @@ class AVConnection
 public:
 	AVConnection() = delete;
 	AVConnection(std::string UserKey);
+    bool is_function(const std::string& funcName);
+    AVFunctions lookup_function(const std::string& funcName);
     void Print_AVFunction(AVFunctions function, std::vector<std::string>& args);
     template<class ...Ts>
         void Print_AVFunction(AVFunctions function, Ts ...args)

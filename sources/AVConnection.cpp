@@ -49,6 +49,16 @@ AVConnection::AVConnection(std::string UserKey) : AVKey(UserKey), specs()
     }
 }
 
+bool AVConnection::is_function(const std::string& funcName)
+{
+    return specs.is_function(funcName);
+}
+
+AVFunctions AVConnection::lookup_function(const std::string& funcName)
+{
+    return specs.lookup_function(funcName);
+}
+
 AVConnection::~AVConnection()
 {
     curl_global_cleanup();
@@ -88,7 +98,7 @@ std::string AVConnection::executeGETRequest(std::string &urlString)
     return return_string;
 }
 
-bool APISpecs::is_function(std::string funcName)
+bool APISpecs::is_function(const std::string& funcName)
 {
     for(std::unordered_map<AVFunctions, APIFunction>::iterator iter =
             api_specs.begin(); iter != api_specs.end(); iter++)
@@ -96,6 +106,16 @@ bool APISpecs::is_function(std::string funcName)
         if(iter->second.funcName == funcName) return true;
     }
     return false;
+}
+
+AVFunctions APISpecs::lookup_function(const std::string& funcName)
+{
+    for(std::unordered_map<AVFunctions, APIFunction>::iterator iter =
+            api_specs.begin(); iter != api_specs.end(); iter++)
+    {
+        if(iter->second.funcName == funcName) return iter->first;
+    }
+    return AVFunctions::NONE;
 }
 
 const char* AVInvalidKey::what()
@@ -1378,4 +1398,15 @@ std::string APISpecs::build_url(AVFunctions func,
     }
     url.pop_back();
     return url;
+}
+void AVConnection::Print_AVFunction(AVFunctions function,
+        std::vector<std::string>& args)
+{
+    args.push_back(AVKey);
+    std::string url(specs.build_url(function, args));
+    std::string data = executeGETRequest(url);
+
+    std::unique_ptr<JsonObject> NewJson(read_from_str(data));
+    NewJson->console_print();
+
 }

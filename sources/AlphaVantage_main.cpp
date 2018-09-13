@@ -30,24 +30,62 @@ int main(int argc, char* argv[])
             return 1;
     }
 
-    if(vm.count("apikey"))
+    if(vm.count("apikey") == 0)
     {
-        std::cout <<  vm["apikey"].as<std::string>() << std::endl;
+        std::cout << "AlphaVantage API key is required\n"
+            "Please claim your personal API Key at:\n"
+            "www.alphavantage.co";
+        return 1;
     }
-    if(vm.count("function"))
+    else if (vm.count("apikey") > 1)
     {
-        std::cout << "Function: " << vm["function"].as<std::string>() << "\n";
+        std::cout << "Multiple Api keys have been provided.\nPlease provide "
+            "only one.\n";
+        return 1;
     }
 
-    if(vm.count("args"))
+    if(vm.count("function") == 0)
     {
-        for(std::vector<std::string>::const_iterator iter =
-                vm["args"].as<std::vector<std::string>>().begin();
-                iter != vm["args"].as<std::vector<std::string>>().end();
-                iter++)
-            std::cout << "Argument= " <<  *iter << "\n";
+        std::cout <<"No function has been provided.\nPlease specify the "
+            "name of the function you want to call\n";
+        return 1;
     }
-    //Lookup the function specs
-    AVConnection conn(vm["apikey"].as<std::string>());
+    else if(vm.count("function") >1)
+    {
+        std::cout << "Multiple function names have been provided.\nPlease "
+            "provide only one.\n";
+        return 1;
+    }
+    try
+    {
+        AVConnection conn(vm["apikey"].as<std::string>());
+        if(!conn.is_function(vm["function"].as<std::string>()))
+        {
+            std::cout << "Error: Wrong function name.\n"
+                "Please consult the documentation at www.alphavanate.co for "
+                "the list of supported functions.\n";
+            return 1;
+        }
+        std::vector<std::string> 
+            arguments(vm["args"].as<std::vector<std::string>>());
+        AVFunctions function = conn.lookup_function(
+                vm["function"].as<std::string>());
+        conn.Print_AVFunction(function, arguments);
+    }
+    catch(AVInvalidKey& ex)
+    {
+        std::cout << "Invalid API key: " << ex.what() << std::endl;
+        return 1;
+    }
+    catch(AVInvalidParameters& ex)
+    {
+        std::cout << "Invalid Parameter: " << ex.what() << std::endl;
+        return 1;
+    }
+    catch(AVQueryFailure& ex)
+    {
+        std::cout << "Query failure: " << ex.what() << std::endl;
+        return 1;
+    }
     return 0;
 }

@@ -657,10 +657,39 @@ BOOST_AUTO_TEST_CASE(Test_dyn_build_url)
 BOOST_AUTO_TEST_CASE(Test_is_function)
 {
     APISpecs specs;
-    bool isvalid = specs.is_function(std::string("TIME_SERIES_DAILY"));
+    std::string strtest("TIME_SERIES_DAILY");
+    bool isvalid = specs.is_function(strtest);
     
     BOOST_CHECK_EQUAL(isvalid, true);
 
-    isvalid = specs.is_function(std::string("randomstring"));
+    strtest = "randomstring";
+    isvalid = specs.is_function(strtest);
     BOOST_CHECK_EQUAL(isvalid, false);
+
+    AVConnection conn("L9AUO9JRFTMP694H");
+    strtest = "TIME_SERIES_DAILY";
+    isvalid = conn.is_function(strtest);
+
+    BOOST_CHECK_EQUAL(isvalid, true);
+
+    strtest = "randomstring";
+    isvalid = conn.is_function(strtest);
+
+    BOOST_CHECK_EQUAL(isvalid, false);
+}
+
+BOOST_AUTO_TEST_CASE(Test_lookup_function)
+{
+    AVConnection conn("L9AUO9JRFTMP694H");
+    APISpecs specs;
+    std::string funcName("TIME_SERIES_DAILY");
+    AVFunctions funcNum = specs.lookup_function(funcName);
+    BOOST_CHECK(funcNum == AVFunctions::TIME_SERIES_DAILY);
+    funcNum = conn.lookup_function(funcName);
+    BOOST_CHECK(funcNum == AVFunctions::TIME_SERIES_DAILY);
+    funcName = "Random String";
+    funcNum = specs.lookup_function(funcName);
+    BOOST_CHECK(funcNum == AVFunctions::NONE);
+    funcNum = conn.lookup_function(funcName);
+    BOOST_CHECK(funcNum == AVFunctions::NONE);
 }
