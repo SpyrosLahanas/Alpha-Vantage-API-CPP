@@ -130,6 +130,8 @@ struct APISpecs
     APISpecs();
     APISpecs(APISpecs& other) = delete;
     APISpecs& operator=(APISpecs& other) = delete;
+    bool is_function(std::string funcName);
+    std::string build_url(AVFunctions func, std::vector<std::string>& args);
     template<class ...Ts>
         std::string build_url(AVFunctions func, Ts ...args)
         {
@@ -176,13 +178,14 @@ class AVConnection
 public:
 	AVConnection() = delete;
 	AVConnection(std::string UserKey);
+    void Print_AVFunction(AVFunctions function, std::vector<std::string>& args);
     template<class ...Ts>
-        void Print_AVFunctions(AVFunctions function, Ts ...args)
+        void Print_AVFunction(AVFunctions function, Ts ...args)
         /*Description: Prints on the terminal the data Alpha Vantage returns
           for the query parameters provided.*/
         {
             //Prepare the URL
-            std::string url = specs.build_url(function, args...);
+            std::string url = specs.build_url(function, args..., AVKey);
             //Execute the request
             std::string datareturned = executeGETRequest(url);
 

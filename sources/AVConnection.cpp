@@ -88,6 +88,16 @@ std::string AVConnection::executeGETRequest(std::string &urlString)
     return return_string;
 }
 
+bool APISpecs::is_function(std::string funcName)
+{
+    for(std::unordered_map<AVFunctions, APIFunction>::iterator iter =
+            api_specs.begin(); iter != api_specs.end(); iter++)
+    {
+        if(iter->second.funcName == funcName) return true;
+    }
+    return false;
+}
+
 const char* AVInvalidKey::what()
 {
     return "Alpha Vantage API key validation failed";
@@ -1338,4 +1348,34 @@ APISpecs::APISpecs() : urlroot("https://www.alphavantage.co/query?")
 
     //ADD the function is specs
     api_specs[AVFunctions::SECTOR] = sector;
+}
+
+std::string APISpecs::build_url(AVFunctions func,
+        std::vector<std::string>& args)
+{
+    //FETCH the function specifications
+    std::unordered_map<AVFunctions, APIFunction>::iterator iter =
+        api_specs.find(func);
+
+    //IF the APIFunction doesn't exist throw error
+    if(iter == api_specs.end()) throw AVInvalidParameters();
+    //Push at the front the string correpsonding to the function argument
+    args.insert(args.begin(), iter->second.funcName);
+    //IF the number of provided arguments doesn't equal the required ones throw
+    //error.
+    if(iter->second.args.size() != args.size()) throw AVInvalidParameters();
+
+    //GET iterator for the functions specs and user input
+    std::vector<APIArgument>::iterator arg_beginit = iter->second.args.begin();
+    std::vector<APIArgument>::iterator arg_endit = iter->second.args.end();
+    std::vector<std::string>::iterator input_beginit = args.begin();
+    std::string url("https://www.alphavantage.co/query?");
+
+    for(arg_beginit; arg_beginit != arg_endit; arg_beginit++)
+    {
+        url += arg_beginit->get_URLarg(*input_beginit).append("&");
+        input_beginit++;
+    }
+    url.pop_back();
+    return url;
 }

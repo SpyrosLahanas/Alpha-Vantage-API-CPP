@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(Test_AVConnection)
 {
     BOOST_CHECK_NO_THROW(
     AVConnection conn(std::string("L9AUO9JRFTMP694H"));
-    conn.Print_AVFunctions(AVFunctions::TIME_SERIES_INTRADAY,
+    conn.Print_AVFunction(AVFunctions::TIME_SERIES_INTRADAY,
             "IVZ", "60min", "compact", "json", "apikey1");
     );
 }
@@ -634,4 +634,33 @@ BOOST_AUTO_TEST_CASE(Test_APISpecs)
     url = specs.build_url(AVFunctions::SECTOR, "apikey");
     teststr = "https://www.alphavantage.co/query?function=SECTOR&apikey=apikey";
     BOOST_CHECK_EQUAL(url, teststr);
+}
+
+BOOST_AUTO_TEST_CASE(Test_dyn_build_url)
+{
+    //Construct a paremeter pack
+    std::vector<std::string> args;
+    args.push_back(std::string("IVZ"));
+    args.push_back(std::string("compact"));
+    args.push_back(std::string("json"));
+    args.push_back(std::string("apikey"));
+
+    //Call the build URL function
+    APISpecs specs; 
+    std::string url = specs.build_url(AVFunctions::TIME_SERIES_DAILY, args);
+    std::string correcturl("https://www.alphavantage.co/query?"
+            "function=TIME_SERIES_DAILY&symbol=IVZ&outputsize=compact&"
+            "datatype=json&apikey=apikey");
+    BOOST_CHECK_EQUAL(url, correcturl);
+}
+
+BOOST_AUTO_TEST_CASE(Test_is_function)
+{
+    APISpecs specs;
+    bool isvalid = specs.is_function(std::string("TIME_SERIES_DAILY"));
+    
+    BOOST_CHECK_EQUAL(isvalid, true);
+
+    isvalid = specs.is_function(std::string("randomstring"));
+    BOOST_CHECK_EQUAL(isvalid, false);
 }
