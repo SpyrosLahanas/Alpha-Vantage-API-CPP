@@ -28,9 +28,9 @@ $(CURDIR)/bin/%.o: $(CURDIR)/sources/%.cpp
 	$(COMPILER) $(CFLAGS) $(INCLUDE) -o$@ $<
 
 $(CURDIR)/bin/Test_SQLiteManager.out: $(CURDIR)/bin/SQLiteManager_test.o \
-	$(CURDIR)/bin/SQLiteManager.o
-	$(COMPILER) $(LIBS) -lboost_unit_test_framework -lboost_filesystem \
-	-lboost_system -lsqlite3 -o$@ $^
+	$(CURDIR)/bin/SQLiteManager.o $(CURDIR)/bin/Instrument.o
+	$(COMPILER) $(LIBS) -o$@ $^ -lboost_system -lboost_unit_test_framework \
+	-lboost_filesystem -lboost_date_time -lsqlite3
 
 $(CURDIR)/bin/Test_AVConnection.out: $(CURDIR)/bin/AVConnection_test.o\
 $(CURDIR)/bin/AVConnection.o $(CURDIR)/bin/JSONParser.o
@@ -39,6 +39,10 @@ $(CURDIR)/bin/AVConnection.o $(CURDIR)/bin/JSONParser.o
 $(CURDIR)/bin/Test_JSONParser.out: $(CURDIR)/bin/JSONParser_test.o \
 	$(CURDIR)/bin/JSONParser.o
 	$(COMPILER) $(LIBS) -lboost_unit_test_framework -o$@ $^
+
+$(CURDIR)/bin/Test_Instrument.out: $(CURDIR)/bin/Instrument_test.o \
+	$(CURDIR)/bin/Instrument.o
+	$(COMPILER) $(LIBS) -o$@ $^ -lboost_unit_test_framework -lboost_date_time
 
 $(CURDIR)/bin/libalphavantage.a: $(CURDIR)/bin/AVConnection.o \
 	$(CURDIR)/bin/JSONParser.o
@@ -86,6 +90,6 @@ run_ctags:
 .PHONY: edit_project
 edit_project:
 	@echo "Open project files in vim..."
-	vim Makefile $(foreach stem, JSON AV SQL Alpha, ./headers/$(stem)* \
+	vim Makefile $(foreach stem, JSON AV SQL Alpha Inst, ./headers/$(stem)* \
 	./sources/$(stem)*)
 

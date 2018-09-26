@@ -5,6 +5,7 @@
 #include <cstring>
 #include <boost/filesystem.hpp>
 #include <exception>
+#include <Instrument.hpp>
 
 class SQLiteSchemaError: public std::exception
 {
@@ -29,5 +30,6 @@ public:
     SQLiteManager(std::string dbFilePath);
     ~SQLiteManager();
     bool validate_schema();
+    void store_PriceHistory(const PriceHistory& data);
 };
 #endif

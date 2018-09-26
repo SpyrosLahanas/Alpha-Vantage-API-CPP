@@ -6,6 +6,7 @@
 #include <sqlite3.h>
 #include <string.h>
 #include <iostream>
+#include "Instrument.hpp"
 
 BOOST_AUTO_TEST_CASE(constructor_test)
 {
@@ -86,4 +87,40 @@ BOOST_AUTO_TEST_CASE(Test_validate_schema)
             "PortfolioAnalyst/Other/new.db");
     if(boost::filesystem::exists(dbPath))
         boost::filesystem::remove(dbPath);
+}
+
+BOOST_AUTO_TEST_CASE(Test_Store_Data)
+{
+    //Initialise a new SQLiteManager
+    SQLiteManager
+        mngr("/home/spyroslahanas/Documents/Programming/PortfolioAnalyst/Other"
+                "/new.db");
+    BOOST_CHECK(true);
+    boost::filesystem::remove("/home/spyroslahanas/Documents/Programming"
+            "/PortfolioAnalyst/Other/new.db");
+}
+
+BOOST_AUTO_TEST_CASE(Test_Store_PriceHistory)
+{
+    //Instatiate a PriceHistory object
+    std::string ticker("IVZ");
+    PriceHistory data(ticker);
+    //Load some dummy data
+    data.insert_dayinfo(boost::gregorian::from_simple_string("2018-09-10"),
+            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0);
+    data.insert_dayinfo(boost::gregorian::from_simple_string("2018-09-11"),
+            2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0);
+    data.insert_dayinfo(boost::gregorian::from_simple_string("2018-09-12"),
+            3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0);
+    data.insert_dayinfo(boost::gregorian::from_simple_string("2018-09-13"),
+            4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0);
+    //Instatiate SQLiteManager
+    SQLiteManager mngr("/home/spyroslahanas/Documents/Programming/"
+            "PortfolioAnalyst/Other/new.db");
+    //Store the DayInfo Object in the database
+    mngr.store_PriceHistory(data);
+    BOOST_CHECK(true);
+//   boost::filesystem::path dummydb("/home/spyroslahanas/Documents/Programming/"
+//            "PortfolioAnalyst/Other/new.db");
+//    if(boost::filesystem::exists(dummydb)) boost::filesystem::remove(dummydb);
 }

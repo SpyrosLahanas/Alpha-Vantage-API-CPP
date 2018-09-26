@@ -69,6 +69,58 @@ bool SQLiteManager::validate_schema()
     return true;
 }
 
+void SQLiteManager::store_PriceHistory(const PriceHistory& data)
+{
+    sqlite3_stmt* stmt;
+    int ticker_ID;
+    if(sqlite3_prepare_v2(db, "SELECT ID FROM tickers WHERE ticker = ?1", -1,
+                &stmt, NULL) != SQLITE_OK) throw SQLiteError();
+    if(sqlite3_bind_text(stmt, 1, data.get_ticker().c_str(), -1,
+                SQLITE_TRANSIENT) != SQLITE_OK) throw SQLiteError();
+    int rc = sqlite3_step(stmt);
+    if(rc == SQLITE_ROW)
+    {
+        ticker_ID = sqlite3_column_int(stmt, 1);
+        sqlite3_finalize(stmt);
+    }
+    else
+    {
+        if(sqlite3_finalize(stmt) != SQLITE_OK) throw SQLiteError();
+        rc = sqlite3_prepare_v2(db, "INSERT INTO tickers(ticker) VALUES(?1)",
+                -1, &stmt, NULL);
+        if(rc != SQLITE_OK) throw SQLiteError();
+        if(sqlite3_bind_text(stmt, 1, data.get_ticker().c_str(), -1,
+                    SQLITE_TRANSIENT) != SQLITE_OK) throw SQLiteError();
+        if(sqlite3_step(stmt) != SQLITE_DONE) throw SQLiteError();
+        ticker_ID = sqlite3_last_insert_rowid(db);
+        if(sqlite3_finalize(stmt) != SQLITE_OK) throw SQLiteError();
+    }
+    if(sqlite3_prepare_v2(db, "INSERT INTO dailyData(tickerID , date, "
+                "open, high, low, close, AdjClose, "
+                "volume, coeff, divident) VALUEs(?1, ?2, ?3, ?4, ?5, ?6, ?7, "
+                "?8, ?9, ?10)", -1, &stmt, NULL) != SQLITE_OK) throw
+        SQLiteError();
+    for(std::unordered_map<boost::gregorian::date, DayInfo, 
+            DateHash>::const_iterator biter =
+             data.cbegin(); biter != data.cend(); biter++)
+    {
+       sqlite3_bind_int(stmt, 1, ticker_ID);
+       sqlite3_bind_text(stmt, 2,
+               boost::gregorian::to_simple_string(biter->first).c_str(),
+               -1, NULL);
+       sqlite3_bind_double(stmt, 3, biter->second.open);
+       sqlite3_bind_double(stmt, 4, biter->second.high);
+       sqlite3_bind_double(stmt, 5, biter->second.low);
+       sqlite3_bind_double(stmt, 6, biter->second.close);
+       sqlite3_bind_double(stmt, 7, biter->second.adjclose);
+       sqlite3_bind_double(stmt, 8, biter->second.volume);
+       sqlite3_bind_double(stmt, 9, biter->second.split_coefficient);
+       sqlite3_bind_double(stmt, 10, biter->second.divident);
+       sqlite3_step(stmt);
+    }
+    sqlite3_finalize(stmt);
+}
+
 SQLiteManager::~SQLiteManager()
 {
     sqlite3_close(db);
