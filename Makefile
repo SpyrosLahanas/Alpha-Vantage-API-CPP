@@ -59,8 +59,8 @@ $(CURDIR)/bin/AlphaVantage.out: $(CURDIR)/bin/libalphavantage.a \
 $(CURDIR)/bin/AVtoSQL.out: $(CURDIR)/bin/libalphavantage.a \
 	$(CURDIR)/bin/AVtoSQL_main.o $(CURDIR)/bin/Instrument.o \
 	$(CURDIR)/bin/SQLiteManager.o
-	$(COMPILER) $^ $(LIBS) -lboost_system -lboost_filesystem \
-	-lboost_date_time -lsqlite3 -lalphavantage -lcurl -o$@
+	$(COMPILER) $^ $(LIBS) -lboost_system -lboost_program_options \
+	-lboost_filesystem -lboost_date_time -lsqlite3 -lalphavantage -lcurl -o$@
 
 .PHONY: clean
 clean:
