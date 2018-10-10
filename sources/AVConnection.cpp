@@ -1410,3 +1410,67 @@ void AVConnection::Print_AVFunction(AVFunctions function,
     NewJson->console_print();
 
 }
+
+PriceHistory AVConnection::fetch_prices(std::string ticker)
+{
+    std::string url = specs.build_url(AVFunctions::TIME_SERIES_DAILY_ADJUSTED,
+                                      ticker, "full", "json", AVKey); 
+    std::string rawdata = executeGETRequest(url);
+    std::unique_ptr<JsonObject> NewJson(read_from_str(rawdata));
+    PriceHistory prices(ticker);
+    //CHECK the meta data section of the JSON returned and confirm
+    std::vector<std::unique_ptr<JsonPair>>::iterator biter = NewJson->begin();
+    std::string temp_str((*biter)->get_name());
+    if(temp_str != std::string("Meta Data")) throw AVQueryFailure();
+    JsonObject obj_ref;
+    (*biter)->get_value(obj_ref);
+    std::vector<std::unique_ptr<JsonPair>>::iterator biter2 = obj_ref.begin();
+    if((*biter2)->get_name() != std::string("1. Information")) throw
+        AVQueryFailure();
+    std::string value_str;
+    (*biter2)->get_value(value_str);
+    if( value_str != std::string("Daily Time Series with Splits and Dividend "
+                "Events"))
+        throw AVQueryFailure();
+    //Iterate through the pairs in the Time Series Section
+    biter++;
+    JsonObject obj_ref2;
+    (*biter)->get_value(obj_ref2);
+    biter2 = obj_ref2.begin();
+    std::vector<std::unique_ptr<JsonPair>>::iterator eiter = obj_ref2.end();
+    for(biter2; biter2 != eiter; biter2++)
+    {
+        boost::gregorian::date date = boost::gregorian::from_simple_string(
+                (*biter2)->get_name());
+        JsonObject obj_ref3;
+        (*biter2)->get_value(obj_ref3);
+        std::vector<std::unique_ptr<JsonPair>>::iterator biter3 =
+            obj_ref3.begin();
+        double open;
+        (*biter3)->get_value(open);
+        biter3++;
+        double high;
+        (*biter3)->get_value(high);
+        biter3++;
+        double low;
+        (*biter3)->get_value(low);
+        biter3++;
+        double close;
+        (*biter3)->get_value(close);
+        biter3++;
+        double adjclose;
+        (*biter3)->get_value(adjclose);
+        biter3++;
+        double volume;
+        (*biter3)->get_value(volume);
+        biter3++;
+        double divident;
+        (*biter3)->get_value(divident);
+        biter3++;
+        double split;
+        (*biter3)->get_value(split);
+        prices.insert_dayinfo(date, open, high, low, close, adjclose, volume,
+                divident, split);
+    }
+    return prices;
+}

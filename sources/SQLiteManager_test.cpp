@@ -89,17 +89,6 @@ BOOST_AUTO_TEST_CASE(Test_validate_schema)
         boost::filesystem::remove(dbPath);
 }
 
-BOOST_AUTO_TEST_CASE(Test_Store_Data)
-{
-    //Initialise a new SQLiteManager
-    SQLiteManager
-        mngr("/home/spyroslahanas/Documents/Programming/PortfolioAnalyst/Other"
-                "/new.db");
-    BOOST_CHECK(true);
-    boost::filesystem::remove("/home/spyroslahanas/Documents/Programming"
-            "/PortfolioAnalyst/Other/new.db");
-}
-
 BOOST_AUTO_TEST_CASE(Test_Store_PriceHistory)
 {
     //Instatiate a PriceHistory object
@@ -120,7 +109,7 @@ BOOST_AUTO_TEST_CASE(Test_Store_PriceHistory)
     //Store the DayInfo Object in the database
     mngr.store_PriceHistory(data);
     BOOST_CHECK(true);
-//   boost::filesystem::path dummydb("/home/spyroslahanas/Documents/Programming/"
-//            "PortfolioAnalyst/Other/new.db");
-//    if(boost::filesystem::exists(dummydb)) boost::filesystem::remove(dummydb);
+    boost::filesystem::path dummydb("/home/spyroslahanas/Documents/Programming/"
+            "PortfolioAnalyst/Other/new.db");
+    if(boost::filesystem::exists(dummydb)) boost::filesystem::remove(dummydb);
 }

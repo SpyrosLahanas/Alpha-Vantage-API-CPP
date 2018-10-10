@@ -7,6 +7,7 @@
 #include <utility>
 #include <unordered_map>
 #include "JSONParser.hpp"
+#include "Instrument.hpp"
 
 //Custom exception for AlphaVantage API errors
 class AVInvalidKey: public std::exception
@@ -198,6 +199,7 @@ public:
             std::unique_ptr<JsonObject> NewJson(read_from_str(datareturned));
             NewJson->console_print();
         }
+    PriceHistory fetch_prices(std::string ticker);
     ~AVConnection();
 };
 #endif

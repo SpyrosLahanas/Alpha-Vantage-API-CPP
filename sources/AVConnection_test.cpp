@@ -693,3 +693,10 @@ BOOST_AUTO_TEST_CASE(Test_lookup_function)
     funcNum = conn.lookup_function(funcName);
     BOOST_CHECK(funcNum == AVFunctions::NONE);
 }
+
+BOOST_AUTO_TEST_CASE(Test_fetch_prices)
+{
+    AVConnection conn("L9AUO9JRFTMP694H");
+    PriceHistory prices = conn.fetch_prices("IVZ");
+    BOOST_CHECK(true);
+}

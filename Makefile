@@ -33,8 +33,10 @@ $(CURDIR)/bin/Test_SQLiteManager.out: $(CURDIR)/bin/SQLiteManager_test.o \
 	-lboost_filesystem -lboost_date_time -lsqlite3
 
 $(CURDIR)/bin/Test_AVConnection.out: $(CURDIR)/bin/AVConnection_test.o\
-$(CURDIR)/bin/AVConnection.o $(CURDIR)/bin/JSONParser.o
-	$(COMPILER) $(LIBS) -lboost_unit_test_framework -lcurl -o$@ $^
+$(CURDIR)/bin/AVConnection.o $(CURDIR)/bin/JSONParser.o \
+$(CURDIR)/bin/Instrument.o
+	$(COMPILER) $(LIBS) -lboost_unit_test_framework -lboost_date_time \
+	-lcurl -o$@ $^
 
 $(CURDIR)/bin/Test_JSONParser.out: $(CURDIR)/bin/JSONParser_test.o \
 	$(CURDIR)/bin/JSONParser.o
@@ -50,12 +52,19 @@ $(CURDIR)/bin/libalphavantage.a: $(CURDIR)/bin/AVConnection.o \
 	ar -rcs $@ $^
 
 $(CURDIR)/bin/AlphaVantage.out: $(CURDIR)/bin/libalphavantage.a \
-	$(CURDIR)/bin/AlphaVantage_main.o
-	$(COMPILER) $^ $(LIBS) -lboost_program_options -lalphavantage -lcurl -o$@
+	$(CURDIR)/bin/AlphaVantage_main.o $(CURDIR)/bin/Instrument.o 
+	$(COMPILER) $^ $(LIBS) -lboost_program_options -lboost_date_time \
+	-lalphavantage -lcurl -o$@
+
+$(CURDIR)/bin/AVtoSQL.out: $(CURDIR)/bin/libalphavantage.a \
+	$(CURDIR)/bin/AVtoSQL_main.o $(CURDIR)/bin/Instrument.o \
+	$(CURDIR)/bin/SQLiteManager.o
+	$(COMPILER) $^ $(LIBS) -lboost_system -lboost_filesystem \
+	-lboost_date_time -lsqlite3 -lalphavantage -lcurl -o$@
 
 .PHONY: clean
 clean:
-	rm -f $(CURDIR)/bin/*.o $(CURDIR)/bin/*.out $(CURDIR)/Dependencies/*.d
+	rm -f $(CURDIR)/bin/* $(CURDIR)/Dependencies/*
 
 .PHONY: print_variables
 print_variables: 

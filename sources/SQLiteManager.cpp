@@ -117,6 +117,7 @@ void SQLiteManager::store_PriceHistory(const PriceHistory& data)
        sqlite3_bind_double(stmt, 9, biter->second.split_coefficient);
        sqlite3_bind_double(stmt, 10, biter->second.divident);
        sqlite3_step(stmt);
+       sqlite3_reset(stmt);
     }
     sqlite3_finalize(stmt);
 }
