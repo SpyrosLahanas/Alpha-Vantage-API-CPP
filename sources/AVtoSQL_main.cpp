@@ -16,19 +16,19 @@ int main(int argc, char* args[])
         ("apikey,k", boost::program_options::value<std::string>(),
          "AlphaVantage ApiKey\nThat is you personal ApiKey\nIf you don't have"
          "one please visit:\nhttps://www.alphavantage.co/")
-        ("file,f", boost::program_optins::value<std::string>(),
+        ("file,f", boost::program_options::value<std::string>(),
          "database file to store the data.")
         ("tickers,t",
          boost::program_options::value<std::vector<std::string>>(),
          "The symbols for which data are to be downloaded");
 
     boost::program_options::positional_options_description posop;
-    posop.add("add", -1);
+    posop.add("tickers", -1);
 
     boost::program_options::variables_map vm;
     boost::program_options::store(
             boost::program_options::command_line_parser(argc,
-                argv).options(desc).positional(posop).run(), vm);
+                args).options(desc).positional(posop).run(), vm);
     boost::program_options::notify(vm);
 
     if(vm.count("help"))
@@ -78,20 +78,20 @@ int main(int argc, char* args[])
         AVConnection conn(vm["apikey"].as<std::string>());
         SQLiteManager mngr(vm["file"].as<std::string>());
         std::vector<std::string> tickers =
-            vm["tickers"].as<std::vector<std::string>>()
+            vm["tickers"].as<std::vector<std::string>>();
         std::vector<std::string>::iterator biter = tickers.begin();
         std::vector<std::string>::iterator eiter = tickers.end();
-        for(biter; biter != eiter, biter++)
+        for(biter; biter != eiter; biter++)
         {
-            PriceHistory prices = conn.fetch_prices(vm);
+            //TODO: Write exception handling to manage query frequency
+            PriceHistory prices = conn.fetch_prices(*biter);
             mngr.store_PriceHistory(prices);
         }
     }
-    catch(const std::exceptions& e)
+    catch(const std::exception& e)
     {
         std::cout << "Program execution interrupted because of the following "
-            "error:\n";
-        e.what();
+            "error:\n" << e.what() << std::endl;
     }
 
     return 0;
